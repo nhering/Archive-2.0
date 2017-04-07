@@ -22,8 +22,8 @@ Functions.create_db()
 class Archive:
     def __init__(self, master):
         master.wm_title("Archive")
-        master.maxsize(418, 500);
-        master.minsize(418, 500);
+        master.maxsize(420, 500);
+        master.minsize(420, 500);
 
         # Menus---------------------------------------------------------------------------------------------------------
         menubar = Menu(master)
@@ -61,14 +61,16 @@ class Archive:
         self.options_text = ttk.Label(options, text= "Select archive option.")
         self.options_text.grid(pady=5, sticky=W, row=0, column=0, columnspan=3)
 
+        self.mod_create_opt0 = ttk.Radiobutton(options, text = "", variable = Functions.mod_or_create, value = 0,)
+
         self.mod_create_opt1 = ttk.Radiobutton(options,
-                                               text = "Files that have been MODIFIED in the past 24 hours.",
+                                               text = "MODIFIED since last archive performed.",
                                                variable = Functions.mod_or_create, value = 1,
                                                command = lambda: Functions.options_set(self, option = "m"))
         self.mod_create_opt1.grid(padx = 2, sticky = W, row = 1, column = 0)
 
         self.mod_create_opt2 = ttk.Radiobutton(options,
-                                               text="Files that have been CREATED in the past 24 hours.",
+                                               text="CREATED  since last archive performed.",
                                                variable = Functions.mod_or_create, value = 2,
                                                command = lambda: Functions.options_set(self, option = "c"))
         self.mod_create_opt2.grid(padx = 2, sticky = W, row = 2, column = 0)
@@ -88,15 +90,29 @@ class Archive:
         self.archive_btn.grid(pady=5, row=2, column=0, sticky=W)
 
         # Misc. info----------------------------------------------------------------------------------------------------
-        self.info = ttk.Label(feedback, text = "Current profile: " + Functions.current_profile)\
-            .grid(pady = 5, row = 3, column = 0, sticky = S+W)
+        misc_info = ttk.Frame(master)
+        misc_info.grid(padx = 5, row = 4, column = 0, sticky  = W)
 
+        self.info_1 = ttk.Label(misc_info,)
+        self.info_1.grid(pady = (3,0), row = 0, column = 0, sticky = S+W)
+
+        self.info_2 = ttk.Label(misc_info)
+        self.info_2.grid(row = 1, column = 0, sticky = S+W)
+
+        self.info_3 = ttk.Label(misc_info)
+        self.info_3.grid(row = 2, column = 0, sticky = S+W)
+
+        self.info_4 = ttk.Label(misc_info)
+        self.info_4.grid(row = 3, column = 0, sticky = S+W)
+
+        Functions.refresh(self)
 
 def main():
     root = Tk()
     root.iconbitmap('archive.ico')
     app = Archive(root)
     root.mainloop()
+
 
 
 if __name__ == "__main__":
