@@ -15,18 +15,20 @@ from tkinter import *
 from tkinter import ttk
 import Profiles
 import Functions
+import About
 
 
 Functions.create_db()
 
-class Archive:
-    def __init__(self, master, *args, **kwargs):
+class Archive():
+    def __init__(self, master,):
         master.wm_title("Archive")
         self.master = master
-        #master.geometry('420x470+10+10')
-        Functions.geo_center_screen(self, 420, 470)
-        master.maxsize(420, 470);
-        master.minsize(420, 470);
+        master.maxsize(420, 470)
+        master.minsize(420, 470)
+        #master.geometry('420x470+750+305')
+        self.master.geometry('420x470+750+305')
+        geo = Functions.geo_center_screen(self, 420, 470)
 
         # Menus---------------------------------------------------------------------------------------------------------
         menubar = Menu(master)
@@ -38,7 +40,7 @@ class Archive:
         menubar.add_cascade(label = "File", menu = filemenu)
 
         helpmenu = Menu(menubar, tearoff = 0)
-        helpmenu.add_command(label = "About", command=lambda: "")
+        helpmenu.add_command(label = "About", command=lambda: About.about_window(self))
         menubar.add_cascade(label = "Help", menu = helpmenu)
 
         master.config(menu=menubar)

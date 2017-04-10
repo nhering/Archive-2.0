@@ -30,10 +30,8 @@ can_archive = [FALSE,FALSE,FALSE]
 # ----------------------------------------------------------------------------------------------------------------------
 def geo_center_screen(self, w, h):
     x = int((self.master.winfo_screenwidth()/2) - (w/2))
-    print(x)
     y = int((self.master.winfo_screenheight()/2) - (h/2))
-    print(y)
-    geo = self.master.geometry('{}x{}+{}+{}'.format(w, h, x ,y))
+    geo = ('{}x{}+{}+{}'.format(w, h, x ,y))
     return geo
 
 def geo_center_master(master, my_width, my_height):
