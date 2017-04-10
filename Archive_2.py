@@ -20,16 +20,19 @@ import Functions
 Functions.create_db()
 
 class Archive:
-    def __init__(self, master):
+    def __init__(self, master, *args, **kwargs):
         master.wm_title("Archive")
-        master.maxsize(420, 500);
-        master.minsize(420, 500);
+        self.master = master
+        #master.geometry('420x470+10+10')
+        Functions.geo_center_screen(self, 420, 470)
+        master.maxsize(420, 470);
+        master.minsize(420, 470);
 
         # Menus---------------------------------------------------------------------------------------------------------
         menubar = Menu(master)
 
         filemenu = Menu(menubar, tearoff = 0)
-        filemenu.add_command(label = "Profiles", command = lambda: Profiles.profile_window(self))
+        filemenu.add_command(label = "Profiles", command = lambda: Profiles.profile_window(self,master))
         filemenu.add_command(label = "Clear All", command = lambda: Functions.clear_all(self))
         filemenu.add_command(label = "Exit", command = master.quit)
         menubar.add_cascade(label = "File", menu = filemenu)

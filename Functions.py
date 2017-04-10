@@ -1,16 +1,12 @@
-from tkinter import *
-from tkinter import ttk
 from tkinter import filedialog
-from tkinter import messagebox
 import shutil
 import os
 from os import listdir
-import Profiles
-import Functions
 from tkinter import *
-from tkinter import ttk, messagebox
+from tkinter import messagebox
 import sqlite3
 import time
+import Functions
 
 # Variables-------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
@@ -27,6 +23,24 @@ profile_selection = ""
 # Used to enable/disable the archive button.
 # Indexes signify: (valid source path), (valid destination path), and (option is selected) respectively
 can_archive = [FALSE,FALSE,FALSE]
+
+
+
+# Geometry--------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+def geo_center_screen(self, w, h):
+    x = int((self.master.winfo_screenwidth()/2) - (w/2))
+    print(x)
+    y = int((self.master.winfo_screenheight()/2) - (h/2))
+    print(y)
+    geo = self.master.geometry('{}x{}+{}+{}'.format(w, h, x ,y))
+    return geo
+
+def geo_center_master(master, my_width, my_height):
+    x = int(((master.winfo_width()/2) - (my_width/2)) + master.winfo_x())
+    y = int(((master.winfo_height()/2) - (my_height/2)) + master.winfo_y())
+    geo = ('{}x{}+{}+{}'.format(my_width, my_height, x, y))
+    return geo
 
 
 
@@ -80,6 +94,7 @@ def update_archive_button(self):
     else:
         self.archive_btn.config(state = DISABLED)
 
+# Called by refresh: Info at bottom of interface
 def update_info(self):
     self.info_1.config(text = "Current profile: " + Functions.current_profile)
     last_archive = time.strftime("%I:%M %p - %A %B,%d %Y",time.localtime(Functions.archive_time))
@@ -97,7 +112,7 @@ def select_dst(self):
     refresh(self)
     update_database(self)
 
-# Called by refresh
+# Called by refresh: Ensure source path is valid
 def validate_src_path(self):
     if Functions.srcdir != "" and os.path.exists(Functions.srcdir):
         can_archive[0] = TRUE
@@ -110,7 +125,7 @@ def validate_src_path(self):
             self.src_label.config(text = "Source path no longer valid.")
             Functions.srcdir = ""
 
-# Called by refresh
+# Called by refresh: Ensure destination path is valid
 def validate_dst_path(self):
     if Functions.dstdir != "" and os.path.exists(Functions.dstdir):
         can_archive[1] = TRUE
@@ -123,7 +138,7 @@ def validate_dst_path(self):
             self.dst_label.config(text="Destination path no longer valid.")
             Functions.dstdir = ""
 
-# Called by refresh
+# Called by refresh: Ensure paths are not the same
 def paths_not_equal(self):
      if Functions.srcdir == "" or Functions.dstdir == "":
          pass
@@ -139,11 +154,10 @@ def options_set(self, option):
     Functions.criteria = option
     populate_list_archive(self)
     can_archive[2] = TRUE
-    #set Functions.mod_or_create = (value of the selected option)
     refresh(self)
     update_database(self)
 
-# Called by options_set
+# Called by options_set: Lists the files in the source folder that meet the criteria set by options buttons
 def populate_list_archive(self):
     if can_archive[0]:
         Functions.archive_list = []
@@ -174,7 +188,7 @@ def populate_list_archive(self):
         self.display_files.delete('1.0', 'end')
         self.display_files.config(state='disabled')
 
-# Called by archive button
+# Called by archive button: copies files from source to destination
 def archive(self):
     for i in Functions.archive_list:
         print(i + " copied")
@@ -184,7 +198,7 @@ def archive(self):
     update_database(self)
     update_info(self)
 
-# Called by menu item 'clear all'
+# Called by menu item 'clear all':
 def clear_all(self):
     Functions.srcdir = ""
     Functions.dstdir = ""
@@ -244,7 +258,7 @@ def populate_list_profiles(self):
         count = cur.fetchone()[0]
         i = 0
         while i < count:
-            cur.execute("""SELECT col_profile FROM tbl_profile""")
+            cur.execute("""SELECT col_profile FROM tbl_profile ORDER BY col_profile COLLATE NOCASE DESC""")
             var_list = cur.fetchall()[i]
             for item in var_list:
                 self.list_profiles.insert(0,str(item))
@@ -264,29 +278,29 @@ def selected_profile(self,event):
 
 
 def create_profile(self):
-    new_profile = self.create_profile_entry.get()
-    new_profile = new_profile.strip()
-    c = sqlite3.connect('db_archive.db')
-    with c:
-        cur = c.cursor()
-        cur.execute("""SELECT COUNT (col_profile) FROM tbl_profile WHERE col_profile = '{}'""".format(new_profile,))
-        count = cur.fetchone()[0]
-        if count == 0:
-            cur.execute("""INSERT INTO tbl_profile \
-                        (col_profile, col_archive_time, col_srcdir, col_dstdir, col_criteria, col_mod_or_create) \
-                         VALUES (?,?,?,?,?,?)""",(new_profile,Functions.archive_time,"","","",0))
-            c.commit()
-            c.close()
-            Functions.current_profile = new_profile
-            self.top.destroy()
-            Functions.refresh(self)
-        else:
-            c.close()
-            messagebox.showerror("Archive: Duplicate Profile",
-                                "Profile already exists.\nThis will not do.",
-                                 parent = self.top)
-            self.create_profile_entry.delete(0,END)
-            self.create_profile_entry.config(state = ACTIVE)
+    if self.create_profile_entry.get().strip() != "":
+        new_profile = self.create_profile_entry.get()
+        new_profile = new_profile.strip()
+        c = sqlite3.connect('db_archive.db')
+        with c:
+            cur = c.cursor()
+            cur.execute("""SELECT COUNT (col_profile) FROM tbl_profile WHERE col_profile = '{}'""".format(new_profile,))
+            count = cur.fetchone()[0]
+            if count == 0:
+                cur.execute("""INSERT INTO tbl_profile \
+                            (col_profile, col_archive_time, col_srcdir, col_dstdir, col_criteria, col_mod_or_create) \
+                             VALUES (?,?,?,?,?,?)""",(new_profile,Functions.archive_time,"","","",0))
+                Functions.current_profile = new_profile
+                self.top.destroy()
+                Functions.refresh(self)
+            else:
+                messagebox.showerror("Archive: Duplicate Profile","Profile already exists.\nThis will not do.",parent = self.top)
+                self.create_profile_entry.delete(0,END)
+                self.create_profile_entry.focus_set()
+    else:
+        self.create_profile_entry.delete(0,END)
+        self.create_profile_entry.focus_set()
+
 
 # Called by select profile
 def use_selected_profile(self):
@@ -296,7 +310,6 @@ def use_selected_profile(self):
         cursor.execute("""SELECT * FROM tbl_profile WHERE col_profile = '{}'""".format(Functions.profile_selection))
         record = cursor.fetchall()
         for i in record:
-            print(i)
             Functions.current_profile = i[1]
             Functions.archive_time = i[2]
             if i[3] == "":
@@ -319,7 +332,7 @@ def delete_selected_profile(self):
     confirm = messagebox.askokcancel\
         ("Archive: Confirm delete.",
          "Profile: '" + Functions.profile_selection + "' will be deleted.\nAnd all that that implies...",
-         parent = self.top, icon = WARNING)
+         parent = self.top)
     if confirm:
         c = sqlite3.connect("db_archive.db")
         with c:

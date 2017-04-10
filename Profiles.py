@@ -2,18 +2,23 @@ import Functions
 from tkinter import *
 from tkinter import ttk
 
-def profile_window(self):
+
+def profile_window(self,master):
     self.top = Toplevel()
+    geo = Functions.geo_center_master(master, 330, 250)
+    self.top.geometry(geo)
+    self.top.grab_set()
     self.top.title("Profile Manager")
     self.top.iconbitmap('archive.ico')
-    self.top.minsize(330,0)
+    #self.top.minsize(330,250)
+    #self.top.maxsize(330,250)
 
     # list of profiles--------------------------------------------------------------------------------------------------
     scroll = Scrollbar(self.top, orient = VERTICAL)
     self.list_profiles = Listbox(self.top, exportselection = 0, yscrollcommand = scroll.set)
     scroll.config(command = self.list_profiles.yview)
-    scroll.grid(padx = (0,2), pady = (0,5), row = 2, column = 1, sticky = N+E+S+W)
-    self.list_profiles.grid(padx = (5,0), pady = (0,5), row = 2, sticky = N+E+S+W)
+    scroll.grid(padx = (0,2), pady = (10,5), row = 2, column = 1, sticky = N+E+S+W)
+    self.list_profiles.grid(padx = (5,0), pady = (10,5), row = 2, sticky = N+E+S+W)
     self.list_profiles.bind('<<ListboxSelect>>',lambda event: Functions.selected_profile(self,event))
 
     # buttons-----------------------------------------------------------------------------------------------------------
