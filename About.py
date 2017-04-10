@@ -22,6 +22,5 @@ def about_window(self):
     about_canvas.create_text(100, 360, font=('console', 15), anchor = NW,  text = text)
 
 
-
 if __name__ == "__main__":
     pass
